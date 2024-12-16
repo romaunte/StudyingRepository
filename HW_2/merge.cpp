@@ -1,13 +1,12 @@
 #include "merge.hpp"
 #include <iostream>
 
-void Merge(int array[], int left, int middle, int right) {
-
+void Merge(int* const array, int left, int middle, int right) {
     const int leftSize = middle - left + 1;
     const int rightSize = right - middle;
 
-    int leftArray[leftSize];
-    int rightArray[rightSize];
+    int* leftArray = new int[leftSize];
+    int* rightArray = new int[rightSize];
 
     for (int i = 0; i < leftSize; ++i) {
         leftArray[i] = array[left + i];
@@ -41,4 +40,7 @@ void Merge(int array[], int left, int middle, int right) {
         ++j;
         ++k;
     }
+
+    delete[] leftArray;
+    delete[] rightArray;
 }

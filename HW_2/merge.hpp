@@ -1,3 +1,3 @@
 #pragma once
 
-void Merge(int array[], int left, int middle, int right);
+void Merge(int* const array, int left, int middle, int right);
