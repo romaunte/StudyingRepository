@@ -6,7 +6,7 @@ using biv::LongNumber;
 LongNumber::LongNumber() {
     numbers = nullptr;
     length = 0;
-    sign = 0;  // 0 значит число равно нулю
+    sign = 0;
 }
 
 LongNumber::LongNumber(const char* const str) {
@@ -28,11 +28,11 @@ LongNumber::LongNumber(const char* const str) {
         sign = 1;
     }
 
-    // Пропускаем ведущие нули
     while (str[pos] == '0' && str[pos + 1] != '\0') pos++;
 
-    length = get_length(str);
-    if (length == 0) {  // если строка пустая после удаления нулей
+    length = get_length(str + pos);
+
+    if (length == 0) {
         numbers = nullptr;
         sign = 0;
         return;
@@ -40,9 +40,11 @@ LongNumber::LongNumber(const char* const str) {
 
     numbers = new int[length];
     for (int i = 0; i < length; ++i) {
-        numbers[i] = str[pos + length - 1 - i] - '0';  // цифры храним в обратном порядке
+        numbers[i] = str[pos + length - 1 - i] - '0';
     }
 }
+
+
 
 LongNumber::LongNumber(const LongNumber& x) {
     length = x.length;
@@ -97,7 +99,8 @@ LongNumber& LongNumber::operator = (const char* const str) {
 
     while (str[pos] == '0' && str[pos + 1] != '\0') pos++;
 
-    length = get_length(str);
+    length = get_length(str + pos);
+
     if (length == 0) {
         numbers = nullptr;
         sign = 0;
@@ -108,6 +111,7 @@ LongNumber& LongNumber::operator = (const char* const str) {
     for (int i = 0; i < length; ++i) {
         numbers[i] = str[pos + length - 1 - i] - '0';
     }
+
 
     return *this;
 }
@@ -161,9 +165,8 @@ bool LongNumber::operator != (const LongNumber& x) const {
 bool LongNumber::operator > (const LongNumber& x) const {
     if (sign > x.sign) return true;
     if (sign < x.sign) return false;
-    if (sign == 0) return false; // оба равны нулю
+    if (sign == 0) return false;
 
-    // Сравниваем длину с учетом знака
     if (length > x.length) return (sign == 1);
     if (length < x.length) return (sign == -1);
 
@@ -369,7 +372,7 @@ int LongNumber::get_digits_number() const noexcept {
 
 int LongNumber::get_rank_number(int rank) const {
     if (rank < 1 || rank > length) return -1;
-    return numbers[length - rank];
+    return numbers[rank - 1];
 }
 
 bool LongNumber::is_negative() const noexcept {
