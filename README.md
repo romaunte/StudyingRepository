@@ -1,0 +1,2 @@
+# StudyingRepository
+For educational purposes
