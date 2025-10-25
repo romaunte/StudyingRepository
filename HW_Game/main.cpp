@@ -22,7 +22,7 @@ char map[MAP_HEIGHT][MAP_WIDTH+1];
 TObject mario;
 TObject *bricks = NULL;
 TObject *moving = NULL;
-int movingLength;
+int movable_count;
 int brick_count;
 int level = 1;
 
@@ -80,15 +80,14 @@ void InitObject(TObject *obj, float xPos, float yPos, float oWidth, float oHeigh
     obj->cType = inType;
     obj->horizonSpeed = 0.2;
 }
-
 void DeleteMoving(int i){
-    --movingLength;
-    moving[i] = moving[movingLength];
-    moving = new TObject[movingLength];
+    for (int j = i; j < movable_count; ++j){
+        moving[j] = moving[j + 1];
+    }
 }
 
 void MarioCollision(){
-    for (int i = 0; i < movingLength; ++i){
+    for (int i = 0; i < movable_count; ++i){
         if (IsCollision(mario, moving[i])){
             if (mario.IsFly == TRUE && mario.vertSpeed > 0 && mario.y + mario.height < moving[i].y + moving[i].height * 0.5){
                 DeleteMoving(i);
@@ -162,7 +161,7 @@ void HorizonMoveMap(float dx){
     for (int i = 0; i < brick_count; ++i){
         bricks[i].x += dx;
     }
-    for (int i = 0; i < movingLength; ++i){
+    for (int i = 0; i < movable_count; ++i){
         moving[i].x += dx;
     }
 }
@@ -171,6 +170,7 @@ bool IsCollision(TObject o1, TObject o2){
     return (((o1.x + o1.width) > o2.x) && (o1.x < (o2.x + o2.width))
             && ((o1.y + o1.height) > o2.y) && (o1.y < (o2.y + o2.height)));
 }
+
 
 void CreateLevel(int lvl){
 
@@ -186,9 +186,14 @@ void CreateLevel(int lvl){
         InitObject(bricks+4, 150, 20, 40, 5, '#');
         InitObject(bricks+5, 210, 15, 10, 10, '+');
 
-        movingLength = 1;
-        moving = new TObject[movingLength];     //realloc
+        movable_count = 6;
+        moving = new TObject[movable_count];     //realloc
         InitObject(moving+0, 25, 10, 3, 2, 'o');
+        InitObject(moving+1, 80, 10, 3, 2, 'o');
+        InitObject(moving+2, 65, 10, 3, 2, 'o');
+        InitObject(moving+3, 120, 10, 3, 2, 'o');
+        InitObject(moving+4, 160, 10, 3, 2, 'o');
+        InitObject(moving+5, 175, 10, 3, 2, 'o');
     }
     if (lvl == 2){
         brick_count = 4;
@@ -197,6 +202,15 @@ void CreateLevel(int lvl){
         InitObject(bricks+1, 80, 20, 15, 5, '#');
         InitObject(bricks+2, 120, 15, 15, 10, '#');
         InitObject(bricks+3, 160, 10, 15, 15, '+');
+
+        movable_count = 6;
+        moving = new TObject[movable_count];     //realloc
+        InitObject(moving+0, 25, 10, 3, 2, 'o');
+        InitObject(moving+1, 50, 10, 3, 2, 'o');
+        InitObject(moving+2, 80, 10, 3, 2, 'o');
+        InitObject(moving+3, 90, 10, 3, 2, 'o');
+        InitObject(moving+4, 120, 10, 3, 2, 'o');
+        InitObject(moving+5, 130, 10, 3, 2, 'o');
     }
 }
 
@@ -219,9 +233,14 @@ int main(){
         for (int i = 0; i < brick_count; ++i){
             PutObjectOnMap(bricks[i]);
         }
-        for (int i = 0; i < movingLength; ++i){
+        for (int i = 0; i < movable_count; ++i){
             move_obj_vertically(moving + i);
             HorizonMoveObject(moving + i);
+            if (moving[i].y > MAP_HEIGHT){
+                DeleteMoving(i);
+                --i;
+                continue;
+            }
             PutObjectOnMap(moving[i]);
         }
         PutObjectOnMap(mario);
