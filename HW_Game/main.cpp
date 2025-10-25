@@ -57,12 +57,14 @@ void move_obj_vertically(TObject *obj){
 
     for (int i = 0; i < brick_count; ++i){
         if (IsCollision(*obj, bricks[i])){
+            if (obj[0].vertSpeed > 0){
+                obj[0].IsFly = FALSE;
+            }
             obj->y -= obj->vertSpeed;
             obj->vertSpeed = 0;
-            obj->IsFly = FALSE;
             if (bricks[i].cType == '+'){
                 ++level;
-                if (level > 2) level = 1;
+                if (level > 3) level = 1;
                 CreateLevel(level);
                 Sleep(1000);
             }
@@ -175,42 +177,64 @@ bool IsCollision(TObject o1, TObject o2){
 void CreateLevel(int lvl){
 
     InitObject(&mario, 39, 10, 3, 3, '@');
+    int counter = 0;
 
-    if (lvl == 1){
+        if (lvl == 1){
+        brick_count = 8;
+        bricks = new TObject[brick_count];
+        InitObject(bricks+(counter++), 20, 20, 40, 5, '#');
+
+        InitObject(bricks+(counter++), 30, 10, 5, 3, '?');
+        InitObject(bricks+(counter++), 50, 10, 5, 3, '?');
+
+        InitObject(bricks+(counter++), 60, 15, 40, 10, '#');
+        InitObject(bricks+(counter++), 100, 20, 20, 5, '#');
+        InitObject(bricks+(counter++), 120, 15, 10, 10, '#');
+        InitObject(bricks+(counter++), 150, 20, 40, 5, '#');
+        InitObject(bricks+(counter++), 210, 15, 10, 10, '+');
+        counter = 0;
+        
+    }
+
+    if (lvl == 2){
+        counter = 0;
         brick_count = 6;
         bricks = new TObject[brick_count];       //realloc
-        InitObject(bricks+0, 20, 20, 40, 5, '#');
-        InitObject(bricks+1, 60, 15, 10, 10, '#');
-        InitObject(bricks+2, 80, 20, 20, 5, '#');
-        InitObject(bricks+3, 120, 15, 10, 10, '#');
-        InitObject(bricks+4, 150, 20, 40, 5, '#');
-        InitObject(bricks+5, 210, 15, 10, 10, '+');
+        InitObject(bricks+(counter++), 20, 20, 40, 5, '#');
+        InitObject(bricks+(counter++), 60, 15, 10, 10, '#');
+        InitObject(bricks+(counter++), 80, 20, 20, 5, '#');
+        InitObject(bricks+(counter++), 120, 15, 10, 10, '#');
+        InitObject(bricks+(counter++), 150, 20, 40, 5, '#');
+        InitObject(bricks+(counter++), 210, 15, 10, 10, '+');
 
+        counter = 0;
         movable_count = 6;
         moving = new TObject[movable_count];     //realloc
-        InitObject(moving+0, 25, 10, 3, 2, 'o');
-        InitObject(moving+1, 80, 10, 3, 2, 'o');
-        InitObject(moving+2, 65, 10, 3, 2, 'o');
-        InitObject(moving+3, 120, 10, 3, 2, 'o');
-        InitObject(moving+4, 160, 10, 3, 2, 'o');
-        InitObject(moving+5, 175, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 25, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 80, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 65, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 120, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 160, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 175, 10, 3, 2, 'o');
     }
-    if (lvl == 2){
+    if (lvl == 3){
+        counter = 0;
         brick_count = 4;
         bricks = new TObject[brick_count];   //realloc
-        InitObject(bricks+0, 20, 20, 40, 5, '#');
-        InitObject(bricks+1, 80, 20, 15, 5, '#');
-        InitObject(bricks+2, 120, 15, 15, 10, '#');
-        InitObject(bricks+3, 160, 10, 15, 15, '+');
+        InitObject(bricks+(counter++), 20, 20, 40, 5, '#');
+        InitObject(bricks+(counter++), 80, 20, 15, 5, '#');
+        InitObject(bricks+(counter++), 120, 15, 15, 10, '#');
+        InitObject(bricks+(counter++), 160, 10, 15, 15, '+');
 
+        counter = 0;
         movable_count = 6;
         moving = new TObject[movable_count];     //realloc
-        InitObject(moving+0, 25, 10, 3, 2, 'o');
-        InitObject(moving+1, 50, 10, 3, 2, 'o');
-        InitObject(moving+2, 80, 10, 3, 2, 'o');
-        InitObject(moving+3, 90, 10, 3, 2, 'o');
-        InitObject(moving+4, 120, 10, 3, 2, 'o');
-        InitObject(moving+5, 130, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 25, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 50, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 80, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 90, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 120, 10, 3, 2, 'o');
+        InitObject(moving+(counter++), 130, 10, 3, 2, 'o');
     }
 }
 
