@@ -48,6 +48,8 @@ void SetObjectPos(TObject *obj, float xPos, float yPos){
 
 bool IsCollision(TObject o1, TObject o2);
 void CreateLevel(int lvl);
+void InitObject(TObject *obj, float xPos, float yPos, float oWidth, float oHeight, char inType);
+
 
 void move_obj_vertically(TObject *obj){
     obj->IsFly = TRUE;
@@ -59,6 +61,10 @@ void move_obj_vertically(TObject *obj){
         if (IsCollision(*obj, bricks[i])){
             if (obj[0].vertSpeed > 0){
                 obj[0].IsFly = FALSE;
+            }
+            if (bricks[i].cType == '?' && obj[0].vertSpeed < 0 && obj == &mario){
+                bricks[i].cType = '-';
+                InitObject(moving+i-1, bricks[i].x, bricks[i].y - 3, 3, 2, '$');
             }
             obj->y -= obj->vertSpeed;
             obj->vertSpeed = 0;
@@ -82,6 +88,7 @@ void InitObject(TObject *obj, float xPos, float yPos, float oWidth, float oHeigh
     obj->cType = inType;
     obj->horizonSpeed = 0.2;
 }
+
 void DeleteMoving(int i){
     for (int j = i; j < movable_count; ++j){
         moving[j] = moving[j + 1];
@@ -110,13 +117,16 @@ void HorizonMoveObject(TObject *obj){
             obj[0].horizonSpeed = -obj[0].horizonSpeed;
             return;
         }
-
-    TObject tmp = *obj;
-    move_obj_vertically(&tmp);
-    if (tmp.IsFly == TRUE){
-        obj[0].x -= obj[0].horizonSpeed;
-        obj[0].horizonSpeed = -obj[0].horizonSpeed;
+    
+    if (obj[0].cType == 'o'){        
+        TObject tmp = *obj;
+        move_obj_vertically(&tmp);
+        if (tmp.IsFly == TRUE){
+            obj[0].x -= obj[0].horizonSpeed;
+            obj[0].horizonSpeed = -obj[0].horizonSpeed;
+        }
     }
+    
 }
 
 bool IsPosInMap(int x, int y){
@@ -177,64 +187,61 @@ bool IsCollision(TObject o1, TObject o2){
 void CreateLevel(int lvl){
 
     InitObject(&mario, 39, 10, 3, 3, '@');
-    int counter = 0;
 
         if (lvl == 1){
-        brick_count = 8;
+        brick_count = 10;
         bricks = new TObject[brick_count];
-        InitObject(bricks+(counter++), 20, 20, 40, 5, '#');
+        InitObject(bricks+0, 20, 20, 40, 5, '#');
 
-        InitObject(bricks+(counter++), 30, 10, 5, 3, '?');
-        InitObject(bricks+(counter++), 50, 10, 5, 3, '?');
+        InitObject(bricks+1, 30, 10, 5, 3, '?');    // +money
+        InitObject(bricks+2, 50, 10, 5, 3, '?');    // +money
 
-        InitObject(bricks+(counter++), 60, 15, 40, 10, '#');
-        InitObject(bricks+(counter++), 100, 20, 20, 5, '#');
-        InitObject(bricks+(counter++), 120, 15, 10, 10, '#');
-        InitObject(bricks+(counter++), 150, 20, 40, 5, '#');
-        InitObject(bricks+(counter++), 210, 15, 10, 10, '+');
-        counter = 0;
+        InitObject(bricks+3, 60, 15, 40, 10, '#');
+        InitObject(bricks+4, 100, 20, 20, 5, '#');
+        InitObject(bricks+5, 120, 15, 10, 10, '#');
+        InitObject(bricks+6, 150, 20, 40, 5, '#');
+        InitObject(bricks+7, 210, 15, 10, 10, '+');
+
+        movable_count = 2;
+        moving = new TObject[movable_count];
         
     }
 
     if (lvl == 2){
-        counter = 0;
         brick_count = 6;
         bricks = new TObject[brick_count];       //realloc
-        InitObject(bricks+(counter++), 20, 20, 40, 5, '#');
-        InitObject(bricks+(counter++), 60, 15, 10, 10, '#');
-        InitObject(bricks+(counter++), 80, 20, 20, 5, '#');
-        InitObject(bricks+(counter++), 120, 15, 10, 10, '#');
-        InitObject(bricks+(counter++), 150, 20, 40, 5, '#');
-        InitObject(bricks+(counter++), 210, 15, 10, 10, '+');
+        InitObject(bricks+0, 20, 20, 40, 5, '#');
+        InitObject(bricks+1, 60, 15, 10, 10, '#');
+        InitObject(bricks+2, 80, 20, 20, 5, '#');
+        InitObject(bricks+3, 120, 15, 10, 10, '#');
+        InitObject(bricks+4, 150, 20, 40, 5, '#');
+        InitObject(bricks+5, 210, 15, 10, 10, '+');
 
-        counter = 0;
         movable_count = 6;
         moving = new TObject[movable_count];     //realloc
-        InitObject(moving+(counter++), 25, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 80, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 65, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 120, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 160, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 175, 10, 3, 2, 'o');
+        InitObject(moving+0, 25, 10, 3, 2, 'o');
+        InitObject(moving+1, 80, 10, 3, 2, 'o');
+        InitObject(moving+2, 65, 10, 3, 2, 'o');
+        InitObject(moving+3, 120, 10, 3, 2, 'o');
+        InitObject(moving+4, 160, 10, 3, 2, 'o');
+        InitObject(moving+5, 175, 10, 3, 2, 'o');
     }
     if (lvl == 3){
-        counter = 0;
         brick_count = 4;
         bricks = new TObject[brick_count];   //realloc
-        InitObject(bricks+(counter++), 20, 20, 40, 5, '#');
-        InitObject(bricks+(counter++), 80, 20, 15, 5, '#');
-        InitObject(bricks+(counter++), 120, 15, 15, 10, '#');
-        InitObject(bricks+(counter++), 160, 10, 15, 15, '+');
+        InitObject(bricks+0, 20, 20, 40, 5, '#');
+        InitObject(bricks+1, 80, 20, 15, 5, '#');
+        InitObject(bricks+2, 120, 15, 15, 10, '#');
+        InitObject(bricks+3, 160, 10, 15, 15, '+');
 
-        counter = 0;
         movable_count = 6;
         moving = new TObject[movable_count];     //realloc
-        InitObject(moving+(counter++), 25, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 50, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 80, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 90, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 120, 10, 3, 2, 'o');
-        InitObject(moving+(counter++), 130, 10, 3, 2, 'o');
+        InitObject(moving+0, 25, 10, 3, 2, 'o');
+        InitObject(moving+1, 50, 10, 3, 2, 'o');
+        InitObject(moving+2, 80, 10, 3, 2, 'o');
+        InitObject(moving+3, 90, 10, 3, 2, 'o');
+        InitObject(moving+4, 120, 10, 3, 2, 'o');
+        InitObject(moving+5, 130, 10, 3, 2, 'o');
     }
 }
 
