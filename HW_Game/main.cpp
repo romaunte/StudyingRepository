@@ -79,6 +79,19 @@ void InitObject(TObject *obj, float xPos, float yPos, float oWidth, float oHeigh
 
 void HorizonMoveObject(TObject *obj){
     obj[0].x += obj[0].horizonSpeed;
+    for (int i = 0; i < brickLength; ++i)
+        if (IsCollision(obj[0], brick[i])){
+            obj[0].x -= obj[0].horizonSpeed;
+            obj[0].horizonSpeed = -obj[0].horizonSpeed;
+            return;
+        }
+
+    TObject tmp = *obj;
+    VertMoveObject(&tmp);
+    if (tmp.IsFly == TRUE){
+        obj[0].x -= obj[0].horizonSpeed;
+        obj[0].horizonSpeed = -obj[0].horizonSpeed;
+    }
 }
 
 bool IsPosInMap(int x, int y){
