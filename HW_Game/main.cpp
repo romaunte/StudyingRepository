@@ -4,8 +4,8 @@
 #include <math.h>
 #include <windows.h>
 
-#define mapWidth 120
-#define mapHeight 25
+const int MAP_HEIGHT = 25;
+const int MAP_WIDTH = 120;
 
 typedef struct SObject {
     float x, y;
@@ -16,7 +16,7 @@ typedef struct SObject {
     float horizonSpeed;
 } TObject;
 
-char map[mapHeight][mapWidth+1];
+char map[MAP_HEIGHT][MAP_WIDTH+1];
 TObject mario;
 TObject *brick = NULL;
 TObject *moving = NULL;
@@ -25,16 +25,16 @@ int brickLength;
 int level = 1;
 
 void ClearMap(){
-    for (int i = 0; i < mapWidth; ++i)
+    for (int i = 0; i < MAP_WIDTH; ++i)
         map[0][i] = ' ';
-    map[0][mapWidth] = '\0';
-    for (int j = 0; j < mapHeight; ++j)
+    map[0][MAP_WIDTH] = '\0';
+    for (int j = 0; j < MAP_HEIGHT; ++j)
         sprintf(map[j], map[0]);
 }
 
 void ShowMap(){
-    map[mapHeight-1][mapWidth-1] = '\0';
-    for (int j = 0; j < mapHeight; ++j)
+    map[MAP_HEIGHT-1][MAP_WIDTH-1] = '\0';
+    for (int j = 0; j < MAP_HEIGHT; ++j)
         printf("%s\n", map[j]);
 }
 
@@ -95,7 +95,7 @@ void HorizonMoveObject(TObject *obj){
 }
 
 bool IsPosInMap(int x, int y){
-    return ((x >= 0) && (x < mapWidth) && (y >= 0) && (y < mapHeight));
+    return ((x >= 0) && (x < MAP_WIDTH) && (y >= 0) && (y < MAP_HEIGHT));
 }
 
 void PutObjectOnMap(TObject obj){
@@ -188,7 +188,7 @@ int main(){
         if (GetKeyState('A') < 0) HorizonMoveMap(1);
         if (GetKeyState('D') < 0) HorizonMoveMap(-1);
 
-        if (mario.y > mapHeight) CreateLevel(level);
+        if (mario.y > MAP_HEIGHT) CreateLevel(level);
 
         VertMoveObject(&mario);
         for (int i = 0; i < brickLength; ++i){
