@@ -130,7 +130,7 @@ void CreateLevel(int lvl){
 
     if (lvl == 1){
         brickLength = 6;
-        brick = new TObject[brickLength];
+        brick = new TObject[brickLength];   //realloc
         InitObject(brick+0, 20, 20, 40, 5, '#');
         InitObject(brick+1, 60, 15, 10, 10, '#');
         InitObject(brick+2, 80, 20, 20, 5, '#');
@@ -140,7 +140,7 @@ void CreateLevel(int lvl){
     }
     if (lvl == 2){
         brickLength = 4;
-        brick = new TObject[brickLength];
+        brick = new TObject[brickLength];   //realloc
         InitObject(brick+0, 20, 20, 40, 5, '#');
         InitObject(brick+1, 80, 20, 15, 5, '#');
         InitObject(brick+2, 120, 15, 15, 10, '#');
@@ -151,6 +151,7 @@ void CreateLevel(int lvl){
 int main(){
     //HideCursor();
     CreateLevel(level);
+    system("color 9F");
 
     while (GetKeyState(VK_ESCAPE) >= 0){
         ClearMap();
