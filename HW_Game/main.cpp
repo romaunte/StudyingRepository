@@ -25,16 +25,42 @@ int level = 1;
 int score;
 int max_level;
 
-void set_obj_pos(Obj *obj, float x_pos, float y_pos){
+const char MARIO = '@';
+const char BRICK = '#';
+const char ENEMY = 'o';
+const char BOX = '?';
+const char EMPTY = '-';
+const char COIN = '$';
+const char WIN_ZONE = '+';
+
+void set_obj_pos(Obj *obj, const float x_pos, const float y_pos);
+bool is_pos_in_map(const int x, const int y);
+void init_obj(Obj *obj, const float x_pos, const float y_pos, const float o_width, const float o_height, const char init_type);
+void put_obj_on_map(const Obj obj);
+bool is_collision(const Obj o1, const Obj o2);
+void move_obj_vertically(Obj *obj);
+void move_obj_horizontally(Obj *obj);
+void delete_movings(const int i);
+void create_level(const int lvl);
+void death();
+void player_collision();
+void hide_cursor();
+void set_cursor(const int x, const int y);
+void show_map();
+void horizontal_move_map(const float dx);
+void put_score_on_map();
+void clear_map();
+
+void set_obj_pos(Obj *obj, const float x_pos, const float y_pos){
     obj->x = x_pos;
     obj->y = y_pos;
 }
 
-bool is_pos_in_map(int x, int y){
+bool is_pos_in_map(const int x, const int y){
     return x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT;
 }
 
-void init_obj(Obj *obj, float x_pos, float y_pos, float o_width, float o_height, char init_type){
+void init_obj(Obj *obj, const float x_pos, const float y_pos, const float o_width, const float o_height, const char init_type){
     set_obj_pos(obj, x_pos, y_pos);
     obj->width = o_width;
     obj->height = o_height;
@@ -43,19 +69,19 @@ void init_obj(Obj *obj, float x_pos, float y_pos, float o_width, float o_height,
     obj->horizontal_speed = 0.2;
 }
 
-void put_obj_on_map(Obj obj){
-    int ix = (int)round(obj.x);
-    int iy = (int)round(obj.y);
-    int iWidth = (int)round(obj.width);
-    int iHeight = (int)round(obj.height);
+void put_obj_on_map(const Obj obj){
+    int i_x = (int)round(obj.x);
+    int i_y = (int)round(obj.y);
+    int i_width = (int)round(obj.width);
+    int i_height = (int)round(obj.height);
 
-    for (int i = ix; i < (ix + iWidth); ++i)
-        for (int j = iy; j < (iy + iHeight); j++)
+    for (int i = i_x; i < (i_x + i_width); ++i)
+        for (int j = i_y; j < (i_y + i_height); j++)
             if (is_pos_in_map(i, j))
                 map[j][i] = obj.obj_type;
 }
 
-bool is_collision(Obj o1, Obj o2){
+bool is_collision(const Obj o1, const Obj o2){
     return (((o1.x + o1.width) > o2.x) && (o1.x < (o2.x + o2.width))
             && ((o1.y + o1.height) > o2.y) && (o1.y < (o2.y + o2.height)));
 }
@@ -70,14 +96,14 @@ void move_obj_vertically(Obj *obj){
             if (obj[0].vertical_speed > 0){
                 obj[0].is_flying = FALSE;
             }
-            if (bricks[i].obj_type == '?' && obj[0].vertical_speed < 0 && obj == &mario){
-                bricks[i].obj_type = '-';
-                init_obj(movings+i+2, bricks[i].x, bricks[i].y - 3, 3, 2, '$');
+            if (bricks[i].obj_type == BOX && obj[0].vertical_speed < 0 && obj == &mario){
+                bricks[i].obj_type = EMPTY;
+                init_obj(movings+i+2, bricks[i].x, bricks[i].y - 3, 3, 2, COIN);
                 movings[i+2].vertical_speed = -0.7;
             }
             obj->y -= obj->vertical_speed;
             obj->vertical_speed = 0;
-            if (bricks[i].obj_type == '+'){
+            if (bricks[i].obj_type == WIN_ZONE){
                 ++level;
                 if (level > max_level) level = 1;
                 system("color 2F");
@@ -98,7 +124,7 @@ void move_obj_horizontally(Obj *obj){
             return;
         }
     
-    if (obj[0].obj_type == 'o'){        
+    if (obj[0].obj_type == ENEMY){        
         Obj tmp = *obj;
         move_obj_vertically(&tmp);
         if (tmp.is_flying == TRUE){
@@ -108,96 +134,90 @@ void move_obj_horizontally(Obj *obj){
     }
 }
 
-void delete_movings(int i){
+void delete_movings(const int i){
     for (int j = i; j < movable_count; ++j){
         movings[j] = movings[j + 1];
     }
 }
 
-void create_level(int lvl){
+void create_level(const int lvl){
     system("color 9F");
     brick_count = 0;
     movable_count = 0;
-    delete bricks;
-    delete movings;
-    init_obj(&mario, 39, 10, 3, 3, '@');
+    if (bricks) delete[] bricks;
+    if (movings) delete[] movings;
+    init_obj(&mario, 39, 10, 3, 3, MARIO);
     score = 0;
 
     if (lvl == 1){
-        delete bricks;
         brick_count = 13;
         bricks = new Obj[brick_count];
 
-        init_obj(bricks+0, 30, 10, 5, 3, '?');
-        init_obj(bricks+1, 50, 10, 5, 3, '?');
-        init_obj(bricks+2, 70, 5, 5, 3, '?');
-        init_obj(bricks+3, 80, 5, 5, 3, '?');
+        init_obj(bricks+0, 30, 10, 5, 3, BOX);
+        init_obj(bricks+1, 50, 10, 5, 3, BOX);
+        init_obj(bricks+2, 70, 5, 5, 3, BOX);
+        init_obj(bricks+3, 80, 5, 5, 3, BOX);
 
-        init_obj(bricks+4, 60, 5, 10, 3, '-');
-        init_obj(bricks+5, 75, 5, 5, 3, '-');
-        init_obj(bricks+6, 85, 5, 10, 3, '-');
+        init_obj(bricks+4, 60, 5, 10, 3, EMPTY);
+        init_obj(bricks+5, 75, 5, 5, 3, EMPTY);
+        init_obj(bricks+6, 85, 5, 10, 3, EMPTY);
 
-        init_obj(bricks+7, 20, 20, 40, 5, '#');
-        init_obj(bricks+8, 60, 15, 40, 10, '#');
-        init_obj(bricks+9, 100, 20, 20, 5, '#');
-        init_obj(bricks+10, 120, 15, 10, 10, '#');
-        init_obj(bricks+11, 150, 20, 40, 5, '#');
+        init_obj(bricks+7, 20, 20, 40, 5, BRICK);
+        init_obj(bricks+8, 60, 15, 40, 10, BRICK);
+        init_obj(bricks+9, 100, 20, 20, 5, BRICK);
+        init_obj(bricks+10, 120, 15, 10, 10, BRICK);
+        init_obj(bricks+11, 150, 20, 40, 5, BRICK);
 
-        init_obj(bricks+12, 210, 15, 10, 10, '+');
+        init_obj(bricks+12, 210, 15, 10, 10, WIN_ZONE);
 
-        delete movings;
         movable_count = 6;
         movings = new Obj[movable_count];
 
-        init_obj(movings+0, 25, 10, 3, 2, 'o');
-        init_obj(movings+1, 80, 10, 3, 2, 'o');
+        init_obj(movings+0, 25, 10, 3, 2, ENEMY);
+        init_obj(movings+1, 80, 10, 3, 2, ENEMY);
     }
 
     if (lvl == 2){
-        delete bricks;
         brick_count = 6;
         bricks = new Obj[brick_count];    
 
-        init_obj(bricks+0, 20, 20, 40, 5, '#');
-        init_obj(bricks+1, 60, 15, 10, 10, '#');
-        init_obj(bricks+2, 80, 20, 20, 5, '#');
-        init_obj(bricks+3, 120, 15, 10, 10, '#');
-        init_obj(bricks+4, 150, 20, 40, 5, '#');
+        init_obj(bricks+0, 20, 20, 40, 5, BRICK);
+        init_obj(bricks+1, 60, 15, 10, 10, BRICK);
+        init_obj(bricks+2, 80, 20, 20, 5, BRICK);
+        init_obj(bricks+3, 120, 15, 10, 10, BRICK);
+        init_obj(bricks+4, 150, 20, 40, 5, BRICK);
 
-        init_obj(bricks+5, 210, 15, 10, 10, '+');
+        init_obj(bricks+5, 210, 15, 10, 10, WIN_ZONE);
 
-        delete movings;
         movable_count = 6;
         movings = new Obj[movable_count];
 
-        init_obj(movings+0, 25, 10, 3, 2, 'o');
-        init_obj(movings+1, 80, 10, 3, 2, 'o');
-        init_obj(movings+2, 65, 10, 3, 2, 'o');
-        init_obj(movings+3, 120, 10, 3, 2, 'o');
-        init_obj(movings+4, 160, 10, 3, 2, 'o');
-        init_obj(movings+5, 175, 10, 3, 2, 'o');
+        init_obj(movings+0, 25, 10, 3, 2, ENEMY);
+        init_obj(movings+1, 80, 10, 3, 2, ENEMY);
+        init_obj(movings+2, 65, 10, 3, 2, ENEMY);
+        init_obj(movings+3, 120, 10, 3, 2, ENEMY);
+        init_obj(movings+4, 160, 10, 3, 2, ENEMY);
+        init_obj(movings+5, 175, 10, 3, 2, ENEMY);
     }
     if (lvl == 3){
-        delete bricks;
         brick_count = 4;
         bricks = new Obj[brick_count];
 
-        init_obj(bricks+0, 20, 20, 40, 5, '#');
-        init_obj(bricks+1, 80, 20, 15, 5, '#');
-        init_obj(bricks+2, 120, 15, 15, 10, '#');
+        init_obj(bricks+0, 20, 20, 40, 5, BRICK);
+        init_obj(bricks+1, 80, 20, 15, 5, BRICK);
+        init_obj(bricks+2, 120, 15, 15, 10, BRICK);
 
-        init_obj(bricks+3, 160, 10, 15, 15, '+');
+        init_obj(bricks+3, 160, 10, 15, 15, WIN_ZONE);
 
-        delete movings;
         movable_count = 6;
         movings = new Obj[movable_count];
 
-        init_obj(movings+0, 25, 10, 3, 2, 'o');
-        init_obj(movings+1, 50, 10, 3, 2, 'o');
-        init_obj(movings+2, 80, 10, 3, 2, 'o');
-        init_obj(movings+3, 90, 10, 3, 2, 'o');
-        init_obj(movings+4, 120, 10, 3, 2, 'o');
-        init_obj(movings+5, 130, 10, 3, 2, 'o');
+        init_obj(movings+0, 25, 10, 3, 2, ENEMY);
+        init_obj(movings+1, 50, 10, 3, 2, ENEMY);
+        init_obj(movings+2, 80, 10, 3, 2, ENEMY);
+        init_obj(movings+3, 90, 10, 3, 2, ENEMY);
+        init_obj(movings+4, 120, 10, 3, 2, ENEMY);
+        init_obj(movings+5, 130, 10, 3, 2, ENEMY);
     }
     max_level = 3;
 }
@@ -211,7 +231,7 @@ void death(){
 void player_collision(){
     for (int i = 0; i < movable_count; ++i){
         if (is_collision(mario, movings[i])){
-            if (movings[i].obj_type == 'o'){
+            if (movings[i].obj_type == ENEMY){
                 if (mario.is_flying == TRUE && mario.vertical_speed > 0 && mario.y + mario.height < movings[i].y + movings[i].height * 0.5){
                     score += 50;
                     delete_movings(i);
@@ -221,7 +241,7 @@ void player_collision(){
                     death();
                 }
             }
-            if (movings[i].obj_type == '$'){
+            if (movings[i].obj_type == COIN){
                 score += 100;
                 delete_movings(i);
                 --i;
@@ -238,7 +258,7 @@ void hide_cursor() {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
-void set_cursor(int x, int y){
+void set_cursor(const int x, const int y){
     COORD coord;
     coord.X = x;
     coord.Y = y;
@@ -246,12 +266,14 @@ void set_cursor(int x, int y){
 }
 
 void show_map(){
-    map[MAP_HEIGHT-1][MAP_WIDTH-1] = '\0';
-    for (int j = 0; j < MAP_HEIGHT; ++j)
-        printf("%s\n", map[j]);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    for (int j = 0; j < MAP_HEIGHT; ++j){
+        DWORD written;
+        WriteConsoleOutputCharacterA(hConsole, map[j], MAP_WIDTH, (COORD){0, j}, &written);
+    }
 }
 
-void horizontal_move_map(float dx){
+void horizontal_move_map(const float dx){
     mario.x -= dx;
     for (int i = 0; i < brick_count; ++i){
         if (is_collision(mario, bricks[i])){
@@ -273,12 +295,8 @@ void put_score_on_map(){
 }
 
 void clear_map(){
-    for (int i = 0; i < MAP_WIDTH; ++i)
-        map[0][i] = ' ';
-    map[0][MAP_WIDTH] = '\0';
-
     for (int j = 0; j < MAP_HEIGHT; ++j)
-        sprintf(map[j], map[0]);
+        memset(map[j], ' ', MAP_WIDTH);
 }
 
 int main(){
@@ -312,7 +330,7 @@ int main(){
         set_cursor(0,0);
         show_map();
 
-        Sleep(10);
+        Sleep(30);
     }
     return 0;
 }
