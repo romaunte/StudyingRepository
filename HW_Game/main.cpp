@@ -98,12 +98,19 @@ void DeleteMoving(int i){
 void MarioCollision(){
     for (int i = 0; i < movable_count; ++i){
         if (IsCollision(mario, moving[i])){
-            if (mario.IsFly == TRUE && mario.vertSpeed > 0 && mario.y + mario.height < moving[i].y + moving[i].height * 0.5){
+            if (moving[i].cType == 'o'){
+                if (mario.IsFly == TRUE && mario.vertSpeed > 0 && mario.y + mario.height < moving[i].y + moving[i].height * 0.5){
+                    DeleteMoving(i);
+                    --i;
+                    continue;
+                } else {
+                    CreateLevel(level);
+                }
+            }
+            if (moving[i].cType == '$'){
                 DeleteMoving(i);
                 --i;
                 continue;
-            } else {
-                CreateLevel(level);
             }
         }
     }
@@ -126,7 +133,7 @@ void HorizonMoveObject(TObject *obj){
             obj[0].horizonSpeed = -obj[0].horizonSpeed;
         }
     }
-    
+
 }
 
 bool IsPosInMap(int x, int y){
@@ -186,6 +193,10 @@ bool IsCollision(TObject o1, TObject o2){
 
 void CreateLevel(int lvl){
 
+    brick_count = 0;
+    movable_count = 0;
+    delete bricks;
+    delete moving;
     InitObject(&mario, 39, 10, 3, 3, '@');
 
         if (lvl == 1){
