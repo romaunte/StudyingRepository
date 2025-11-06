@@ -64,7 +64,7 @@ void move_obj_vertically(TObject *obj){
             }
             if (bricks[i].cType == '?' && obj[0].vertSpeed < 0 && obj == &mario){
                 bricks[i].cType = '-';
-                InitObject(moving+i-1, bricks[i].x, bricks[i].y - 3, 3, 2, '$');
+                InitObject(moving+i+2, bricks[i].x, bricks[i].y - 3, 3, 2, '$');
             }
             obj->y -= obj->vertSpeed;
             obj->vertSpeed = 0;
@@ -200,21 +200,30 @@ void CreateLevel(int lvl){
     InitObject(&mario, 39, 10, 3, 3, '@');
 
         if (lvl == 1){
-        brick_count = 10;
+        brick_count = 13;
         bricks = new TObject[brick_count];
-        InitObject(bricks+0, 20, 20, 40, 5, '#');
 
-        InitObject(bricks+1, 30, 10, 5, 3, '?');    // +money
-        InitObject(bricks+2, 50, 10, 5, 3, '?');    // +money
+        InitObject(bricks+0, 30, 10, 5, 3, '?');
+        InitObject(bricks+1, 50, 10, 5, 3, '?');
+        InitObject(bricks+2, 70, 5, 5, 3, '?');
+        InitObject(bricks+3, 80, 5, 5, 3, '?');
 
-        InitObject(bricks+3, 60, 15, 40, 10, '#');
-        InitObject(bricks+4, 100, 20, 20, 5, '#');
-        InitObject(bricks+5, 120, 15, 10, 10, '#');
-        InitObject(bricks+6, 150, 20, 40, 5, '#');
-        InitObject(bricks+7, 210, 15, 10, 10, '+');
+        InitObject(bricks+4, 60, 5, 10, 3, '-');
+        InitObject(bricks+5, 75, 5, 5, 3, '-');
+        InitObject(bricks+6, 85, 5, 10, 3, '-');
 
-        movable_count = 2;
+        InitObject(bricks+7, 20, 20, 40, 5, '#');
+        InitObject(bricks+8, 60, 15, 40, 10, '#');
+        InitObject(bricks+9, 100, 20, 20, 5, '#');
+        InitObject(bricks+10, 120, 15, 10, 10, '#');
+        InitObject(bricks+11, 150, 20, 40, 5, '#');
+        InitObject(bricks+12, 210, 15, 10, 10, '+');
+
+        movable_count = 6;
         moving = new TObject[movable_count];
+
+        InitObject(moving+0, 25, 10, 3, 2, 'o');
+        InitObject(moving+1, 80, 10, 3, 2, 'o');
         
     }
 
