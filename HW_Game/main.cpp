@@ -25,6 +25,8 @@ TObject *moving = NULL;
 int movable_count;
 int brick_count;
 int level = 1;
+int score;
+int maxlvl;
 
 void clearMap(){
     for (int i = 0; i < MAP_WIDTH; ++i)
@@ -65,12 +67,13 @@ void move_obj_vertically(TObject *obj){
             if (bricks[i].cType == '?' && obj[0].vertSpeed < 0 && obj == &mario){
                 bricks[i].cType = '-';
                 InitObject(moving+i+2, bricks[i].x, bricks[i].y - 3, 3, 2, '$');
+                moving[i+2].vertSpeed = -0.7;
             }
             obj->y -= obj->vertSpeed;
             obj->vertSpeed = 0;
             if (bricks[i].cType == '+'){
                 ++level;
-                if (level > 3) level = 1;
+                if (level > maxlvl) level = 1;
                 system("color 2F");
                 Sleep(500);
                 CreateLevel(level);
@@ -107,6 +110,7 @@ void MarioCollision(){
         if (IsCollision(mario, moving[i])){
             if (moving[i].cType == 'o'){
                 if (mario.IsFly == TRUE && mario.vertSpeed > 0 && mario.y + mario.height < moving[i].y + moving[i].height * 0.5){
+                    score += 50;
                     DeleteMoving(i);
                     --i;
                     continue;
@@ -115,6 +119,7 @@ void MarioCollision(){
                 }
             }
             if (moving[i].cType == '$'){
+                score += 100;
                 DeleteMoving(i);
                 --i;
                 continue;
@@ -197,6 +202,14 @@ bool IsCollision(TObject o1, TObject o2){
             && ((o1.y + o1.height) > o2.y) && (o1.y < (o2.y + o2.height)));
 }
 
+void PutScoreOnMap(){
+    char c[30];
+    sprintf(c, "Score %d", score);
+    int len = strlen(c);
+    for (int i = 0; i < len; ++i){
+        map[1][i+5] = c[i];
+    }
+}
 
 void CreateLevel(int lvl){
 
@@ -206,6 +219,7 @@ void CreateLevel(int lvl){
     delete bricks;
     delete moving;
     InitObject(&mario, 39, 10, 3, 3, '@');
+    score = 0;
 
         if (lvl == 1){
         brick_count = 13;
@@ -271,6 +285,7 @@ void CreateLevel(int lvl){
         InitObject(moving+4, 120, 10, 3, 2, 'o');
         InitObject(moving+5, 130, 10, 3, 2, 'o');
     }
+    maxlvl = 3;
 }
 
 int main(){
@@ -302,6 +317,7 @@ int main(){
             PutObjectOnMap(moving[i]);
         }
         PutObjectOnMap(mario);
+        PutScoreOnMap();
         setCur(0,0);
         ShowMap();
 
