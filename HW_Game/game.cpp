@@ -7,8 +7,11 @@ const int MAP_WIDTH  = 80;
 const int MAP_HEIGHT = 25;
 
 const char PLAYER_CHAR = '@';
-const char BLOCK_CHAR  = '█';
+const char BLOCK_CHAR  = '#';
 const char EMPTY_CHAR  = ' ';
+
+const float GRAVITY        = 0.5f;
+const float MAX_FALL_SPEED = 3.0f;
 
 class GameObject {
     protected:
@@ -45,26 +48,58 @@ class GameObject {
         void setPosition(float nx, float ny) { x = nx; y = ny; }
 };
 
-class Player : public GameObject {
-public:
-    Player(float x_, float y_)
-        : GameObject(x_, y_, 3, 3, PLAYER_CHAR)
-    {}
+class Block : public GameObject {
+    public:
+        Block() : GameObject(0, 0, 1, 1, BLOCK_CHAR) {}
+        Block(float x_, float y_, float w_ = 1.0f, float h_ = 1.0f)
+            : GameObject(x_, y_, w_, h_, BLOCK_CHAR) {}
+    };
 
-    void update() {
-        if (GetAsyncKeyState('A') & 0x8000) {
-            x -= 1.0f;
+class Player : public GameObject {
+    float vy;
+    bool onGround;
+    public:
+        Player(float x_, float y_)
+            : GameObject(x_, y_, 3, 3, PLAYER_CHAR), vy(0.0f), onGround(false) {}
+
+        void update(const Block blocks[], int numBlocks) {
+            if (GetAsyncKeyState('A') & 0x8000) {
+                x -= 1.0f;
+            }
+            if (GetAsyncKeyState('D') & 0x8000) {
+                x += 1.0f;
+            }
+            if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
+                if (onGround) {
+                    vy = -6.0f;
+                    onGround = false;
+                }
+            }
+
+            vy += GRAVITY;
+            if (vy > MAX_FALL_SPEED) vy = MAX_FALL_SPEED;
+            y += vy;
+            onGround = false;
+
+            for (int i = 0; i < numBlocks; ++i) {
+                const Block& b = blocks[i];
+
+                bool overlapX = x < b.getX() + b.getW() && x + w > b.getX();
+                bool overlapY = y < b.getY() + b.getH() && y + h > b.getY();
+
+                if (overlapX && overlapY) {
+                    if (vy > 0) {
+                        y = b.getY() - h;
+                        vy = 0;
+                        onGround = true;
+                    }
+                    else if (vy < 0) {
+                        y = b.getY() + b.getH();
+                        vy = 0;
+                    }
+                }
+            }
         }
-        if (GetAsyncKeyState('D') & 0x8000) {
-            x += 1.0f;
-        }
-        if (GetAsyncKeyState('W') & 0x8000) {
-            y -= 1.0f;
-        }
-        if (GetAsyncKeyState('S') & 0x8000) {
-            y += 1.0f;
-        }
-    }
 };
 
 void hideCursor() {
@@ -83,7 +118,15 @@ void setCursor(int x, int y) {
 
 int main() {
     static char screen[MAP_HEIGHT][MAP_WIDTH];
-    Player mario(10, 10);
+    Player mario(10, 5);
+
+
+    const int NUM_BLOCKS = MAP_WIDTH;
+    Block blocks[NUM_BLOCKS];
+    for (int i = 0; i < NUM_BLOCKS; ++i) {
+        blocks[i] = Block((float)i, MAP_HEIGHT - 2, 1.0f, 2.0f);
+    }
+
     hideCursor();
 
     while (true) {
@@ -94,7 +137,9 @@ int main() {
             }
         }
 
-        mario.update();
+        mario.update(blocks, NUM_BLOCKS);
+        for (int i = 0; i < NUM_BLOCKS; ++i)
+            blocks[i].draw(screen);
         mario.draw(screen);
 
         setCursor(0, 0);
@@ -103,7 +148,7 @@ int main() {
         for (int j = 0; j < MAP_HEIGHT; ++j) {
             WriteConsoleOutputCharacterA(hConsole, screen[j], MAP_WIDTH, {0, (SHORT)j}, &written);
         }
-        
+
         Sleep(30);
     }
 
