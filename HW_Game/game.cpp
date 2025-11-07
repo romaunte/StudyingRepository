@@ -144,13 +144,11 @@ class Game {
             currentLevel = lvl;
             score = 0;
 
-            // Деактивируем все объекты
             for (int i = 0; i < NUM_BLOCKS; i++) blocks[i].active = false;
             for (int i = 0; i < NUM_ENEMIES; i++) enemies[i].active = false;
             for (int i = 0; i < NUM_COINS * 2; i++) coins[i].active = false;
             winZone.active = false;
 
-            // Позиция игрока
             player.x = 5;
             player.y = MAP_HEIGHT - 6;
             player.vx = 0;
@@ -161,7 +159,6 @@ class Game {
                 case 1: {
                     levelLength = 220.0f;
 
-                    // Платформы
                     blocks[0].init(0, MAP_HEIGHT - 2, 20, 2);
                     blocks[1].init(30, MAP_HEIGHT - 2, 20, 2);
                     blocks[2].init(60, MAP_HEIGHT - 4, 20, 2);
@@ -169,19 +166,16 @@ class Game {
                     blocks[4].init(130, MAP_HEIGHT - 6, 20, 2);
                     blocks[5].init(170, MAP_HEIGHT - 2, 20, 2);
 
-                    // Монеты
                     coins[0].init(35, MAP_HEIGHT - 5);
                     coins[1].init(65, MAP_HEIGHT - 7);
                     coins[2].init(95, MAP_HEIGHT - 5);
                     coins[3].init(135, MAP_HEIGHT - 9);
                     coins[4].init(175, MAP_HEIGHT - 5);
 
-                    // Враги — только на платформах
                     enemies[0].init(5, blocks[0].y - enemies[0].h);
                     enemies[1].init(65, blocks[2].y - enemies[1].h);
                     enemies[2].init(140, blocks[4].y - enemies[2].h);
 
-                    // Финиш
                     winZone.init(195, MAP_HEIGHT - 4);
                     break;
                 }
@@ -189,7 +183,6 @@ class Game {
                 case 2: {
                     levelLength = 240.0f;
 
-                    // Платформы
                     blocks[0].init(0, MAP_HEIGHT - 2, 25, 2);
                     blocks[1].init(35, MAP_HEIGHT - 4, 20, 2);
                     blocks[2].init(65, MAP_HEIGHT - 6, 15, 2);
@@ -197,19 +190,16 @@ class Game {
                     blocks[4].init(130, MAP_HEIGHT - 4, 20, 2);
                     blocks[5].init(170, MAP_HEIGHT - 2, 25, 2);
 
-                    // Монеты
                     coins[0].init(40, MAP_HEIGHT - 6);
                     coins[1].init(70, MAP_HEIGHT - 8);
                     coins[2].init(95, MAP_HEIGHT - 4);
                     coins[3].init(135, MAP_HEIGHT - 6);
                     coins[4].init(175, MAP_HEIGHT - 4);
 
-                    // Враги на платформах
                     enemies[0].init(35, blocks[1].y - enemies[0].h);
                     enemies[1].init(130, blocks[4].y - enemies[1].h);
                     enemies[2].init(175, blocks[5].y - enemies[2].h);
 
-                    // Финиш
                     winZone.init(200, MAP_HEIGHT - 4);
                     break;
                 }
@@ -217,7 +207,6 @@ class Game {
                 case 3: {
                     levelLength = 240.0f;
 
-                    // Платформы
                     blocks[0].init(0, MAP_HEIGHT - 2, 25, 2);
                     blocks[1].init(30, MAP_HEIGHT - 4, 20, 2);
                     blocks[2].init(60, MAP_HEIGHT - 6, 15, 2);
@@ -226,7 +215,6 @@ class Game {
                     blocks[5].init(155, MAP_HEIGHT - 6, 20, 2);
                     blocks[6].init(190, MAP_HEIGHT - 2, 25, 2);
 
-                    // Монеты
                     coins[0].init(35, MAP_HEIGHT - 5);
                     coins[1].init(65, MAP_HEIGHT - 7);
                     coins[2].init(90, MAP_HEIGHT - 3);
@@ -234,12 +222,10 @@ class Game {
                     coins[4].init(160, MAP_HEIGHT - 7);
                     coins[5].init(195, MAP_HEIGHT - 3);
 
-                    // Враги на платформах
                     enemies[0].init(35, blocks[1].y - enemies[0].h);
                     enemies[1].init(125, blocks[4].y - enemies[1].h);
                     enemies[2].init(195, blocks[6].y - enemies[2].h);
 
-                    // Финиш
                     winZone.init(220, MAP_HEIGHT - 4);
                     break;
                 }
@@ -374,6 +360,7 @@ class Game {
                 if (!e.active) continue;
                 if (player.intersects(e)) {
                     if (player.vy > 0 && player.y + player.h <= e.y + e.h*0.5f) {
+                        score += 50;
                         e.active=false;
                     } else { 
                         loadLevel(currentLevel);
