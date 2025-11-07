@@ -46,9 +46,10 @@ class Player : public GameObject {
         bool onGround;
         Player() : GameObject(5, 5, 2, 2, PLAYER_CHAR), onGround(false) {}
 
-        void handleInput() {
-            if (GetKeyState('A') & 0x8000) x -= PLAYER_SPEED;
-            if (GetKeyState('D') & 0x8000) x += PLAYER_SPEED;
+        void handleInput(float &dx) {
+            dx = 0;
+            if (GetKeyState('A') & 0x8000) dx = PLAYER_SPEED;
+            if (GetKeyState('D') & 0x8000) dx = -PLAYER_SPEED;
             if (onGround && (GetKeyState(VK_SPACE) & 0x8000)) {
                 vy = JUMP_SPEED;
                 onGround = false;
@@ -272,6 +273,13 @@ class Game {
             }
         }
 
+        void scrollWorld(float dx) {
+            for (int i = 0; i < NUM_BLOCKS; ++i) blocks[i].x += dx;
+            for (int i = 0; i < NUM_BOXES; ++i) boxes[i].x += dx;
+            for (int i = 0; i < NUM_ENEMIES; ++i) enemies[i].x += dx;
+            for (int i = 0; i < NUM_COINS*2; ++i) coins[i].x += dx;
+        }
+
         void render() {
             for (int j = 0; j < MAP_HEIGHT; ++j)
                 for (int i = 0; i < MAP_WIDTH; ++i)
@@ -321,7 +329,9 @@ class Game {
 
         void run() {
             while (GetKeyState(VK_ESCAPE) >= 0) {
-                player.handleInput();
+                float dx = 0;
+                player.handleInput(dx);
+                scrollWorld(dx);
                 updatePlayerPhysics();
                 updateEnemies();
                 updateCoins();
