@@ -44,3 +44,68 @@ class GameObject {
 
         void setPosition(float nx, float ny) { x = nx; y = ny; }
 };
+
+class Player : public GameObject {
+public:
+    Player(float x_, float y_)
+        : GameObject(x_, y_, 3, 3, PLAYER_CHAR)
+    {}
+
+    void update() {
+        if (GetAsyncKeyState('A') & 0x8000) {
+            x -= 1.0f;
+        }
+        if (GetAsyncKeyState('D') & 0x8000) {
+            x += 1.0f;
+        }
+        if (GetAsyncKeyState('W') & 0x8000) {
+            y -= 1.0f;
+        }
+        if (GetAsyncKeyState('S') & 0x8000) {
+            y += 1.0f;
+        }
+    }
+};
+
+void hideCursor() {
+    CONSOLE_CURSOR_INFO info;
+    info.dwSize = 100;
+    info.bVisible = FALSE;
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
+}
+
+void setCursor(int x, int y) {
+    COORD c;
+    c.X = x;
+    c.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+}
+
+int main() {
+    static char screen[MAP_HEIGHT][MAP_WIDTH];
+    Player mario(10, 10);
+    hideCursor();
+
+    while (true) {
+        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) break;
+        for (int j = 0; j < MAP_HEIGHT; ++j) {
+            for (int i = 0; i < MAP_WIDTH; ++i) {
+                screen[j][i] = EMPTY_CHAR;
+            }
+        }
+
+        mario.update();
+        mario.draw(screen);
+
+        setCursor(0, 0);
+        DWORD written;
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        for (int j = 0; j < MAP_HEIGHT; ++j) {
+            WriteConsoleOutputCharacterA(hConsole, screen[j], MAP_WIDTH, {0, (SHORT)j}, &written);
+        }
+        
+        Sleep(30);
+    }
+
+    return 0;
+}
