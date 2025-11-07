@@ -3,8 +3,8 @@
 #include <cstdio>
 #include <conio.h>
 
-const int MAP_WIDTH  = 80;
-const int MAP_HEIGHT = 25;
+const int MAP_WIDTH  = 240;
+const int MAP_HEIGHT = 50;
 
 const char PLAYER_CHAR = '@';
 const char BLOCK_CHAR  = '#';
@@ -12,7 +12,7 @@ const char ENEMY_CHAR = 'o';
 const char COIN_CHAR = '$';
 const char BOX_CHAR  = '?';
 const char EMPTY_CHAR = ' ';
-const char WIN_CHAR    = '+';
+const char WIN_CHAR    = 'W';
 
 const float GRAVITY = 0.05f;
 const float PLAYER_SPEED = 0.5f;
@@ -20,7 +20,7 @@ const float JUMP_SPEED = -1.0f;
 const float ENEMY_SPEED = 0.2f;
 const float COIN_UP_SPEED = -0.7f;
 
-const int NUM_BLOCKS = 40;
+const int NUM_BLOCKS = 60;
 const int NUM_ENEMIES = 5;
 const int NUM_COINS = 10;
 const int NUM_BOXES   = 5;
@@ -49,8 +49,8 @@ class Player : public GameObject {
 
         void handleInput(float &dx) {
             dx = 0.0f;
-            if (GetKeyState('A') & 0x8000) dx = PLAYER_SPEED;
-            if (GetKeyState('D') & 0x8000) dx = -PLAYER_SPEED;
+            if (GetKeyState('A') & 0x8000) dx = -PLAYER_SPEED;
+            if (GetKeyState('D') & 0x8000) dx = PLAYER_SPEED;
             if (onGround && (GetKeyState(VK_SPACE) & 0x8000)) {
                 vy = JUMP_SPEED;
                 onGround = false;
@@ -153,14 +153,13 @@ class Game {
 
         Game() {
             hideCursor();
-            loadLevel(1);
+            loadLevel(3);
         }
 
         void loadLevel(int lvl) {
             currentLevel = lvl;
             score = 0;
 
-            // Очистка объектов
             for (int i = 0; i < NUM_BLOCKS; i++) blocks[i].active = false;
             for (int i = 0; i < NUM_BOXES; i++) boxes[i].active = false;
             for (int i = 0; i < NUM_ENEMIES; i++) enemies[i].active = false;
@@ -168,62 +167,97 @@ class Game {
             winZone.active = false;
 
             player.x = 5;
-            player.y = MAP_HEIGHT - 5;
+            player.y = MAP_HEIGHT - 6;
             player.vx = 0;
             player.vy = 0;
             player.onGround = false;
 
             switch (lvl) {
-                case 1:
-                    levelLength = 200.0f;
-                    for (int i = 0; i < 20; i++) {
+                case 1: {
+                    levelLength = 220.0f;
+
+                    for (int i = 0; i < 45; i++) {
+                        if (i >= 20 && i <= 23) continue;
                         blocks[i].init(i * 5, MAP_HEIGHT - 2, 5, 2);
                     }
-                    for (int i = 0; i < 3; i++) {
-                        boxes[i].init(15 + i * 25, MAP_HEIGHT - 6);
-                    }
-                    for (int i = 0; i < 2; i++) {
-                        enemies[i].init(30 + i * 40, MAP_HEIGHT - 4);
-                    }
-                    for (int i = 0; i < 5; i++) {
-                        coins[i].init(10 + i * 15, MAP_HEIGHT - 5);
-                    }
-                    winZone.init(195, MAP_HEIGHT - 4);
-                    break;
 
-                case 2:
-                    levelLength = 300.0f;
-                    for (int i = 0; i < 25; i++) {
-                        blocks[i].init(i * 6, MAP_HEIGHT - 2, 5, 2);
-                    }
-                    for (int i = 0; i < 4; i++) {
-                        boxes[i].init(20 + i * 40, MAP_HEIGHT - 6);
-                    }
-                    for (int i = 0; i < 3; i++) {
-                        enemies[i].init(25 + i * 60, MAP_HEIGHT - 4);
-                    }
-                    for (int i = 0; i < 7; i++) {
-                        coins[i].init(15 + i * 20, MAP_HEIGHT - 5);
-                    }
-                    winZone.init(295, MAP_HEIGHT - 4);
-                    break;
+                    blocks[45].init(130, MAP_HEIGHT - 8, 6, 2);
+                    blocks[46].init(145, MAP_HEIGHT - 12, 6, 2);
 
-                case 3:
-                    levelLength = 400.0f;
-                    for (int i = 0; i < 30; i++) {
-                        blocks[i].init(i * 7, MAP_HEIGHT - 2, 5, 2);
-                    }
+                    boxes[0].init(30, MAP_HEIGHT - 6);
+                    boxes[1].init(80, MAP_HEIGHT - 6);
+                    boxes[2].init(140, MAP_HEIGHT - 14);
+
+                    enemies[0].init(60, MAP_HEIGHT - 4);
+                    enemies[1].init(100, MAP_HEIGHT - 4);
+                    enemies[2].init(150, MAP_HEIGHT - 14);
+
                     for (int i = 0; i < 5; i++) {
-                        boxes[i].init(30 + i * 50, MAP_HEIGHT - 6);
+                        coins[i].init(10 + i * 10, MAP_HEIGHT - 5);
                     }
-                    for (int i = 0; i < 5; i++) {
-                        enemies[i].init(40 + i * 60, MAP_HEIGHT - 4);
+                    for (int i = 5; i < 8; i++) {
+                        coins[i].init(130 + (i - 5) * 5, MAP_HEIGHT - 15);
                     }
+
+                    winZone.init(215, MAP_HEIGHT - 4);
+                    break;
+                }
+
+                case 2: {
+                    levelLength = 240.0f;
+
+                    for (int i = 0; i < 20; i++) {
+                        blocks[i].init(i * 6, MAP_HEIGHT - 2, 6, 2);
+                    }
+                    for (int i = 0; i < 8; i++) {
+                        blocks[20 + i].init(120 + i * 8, MAP_HEIGHT - 8 - (i % 2) * 4, 8, 2);
+                    }
+
+                    boxes[0].init(60, MAP_HEIGHT - 6);
+                    boxes[1].init(140, MAP_HEIGHT - 12);
+                    boxes[2].init(176, MAP_HEIGHT - 16);
+                    boxes[3].init(200, MAP_HEIGHT - 12);
+
                     for (int i = 0; i < 10; i++) {
-                        coins[i].init(20 + i * 25, MAP_HEIGHT - 5);
+                        coins[i].init(120 + i * 10, MAP_HEIGHT - 15 - (i % 2) * 4);
                     }
-                    winZone.init(395, MAP_HEIGHT - 4);
+
+                    enemies[0].init(80, MAP_HEIGHT - 4);
+                    enemies[1].init(150, MAP_HEIGHT - 10);
+                    enemies[2].init(190, MAP_HEIGHT - 14);
+
+                    winZone.init(230, MAP_HEIGHT - 18);
                     break;
+                }
+
+                case 3: {
+                    levelLength = 240.0f;
+                    for (int i = 0; i < 50; i++) {
+                        if (i % 10 == 5) continue;
+                        float heightOffset = (i % 15 < 7) ? 0 : 4;
+                        blocks[i].init(i * 5, MAP_HEIGHT - 2 - heightOffset, 5, 2);
+                    }
+
+                    blocks[51].init(90, MAP_HEIGHT - 14, 10, 2);
+                    blocks[52].init(160, MAP_HEIGHT - 20, 10, 2);
+                    blocks[53].init(200, MAP_HEIGHT - 10, 10, 2);
+
+                    boxes[0].init(100, MAP_HEIGHT - 16);
+                    boxes[1].init(160, MAP_HEIGHT - 22);
+                    boxes[2].init(210, MAP_HEIGHT - 12);
+
+                    for (int i = 0; i < 12; i++) {
+                        coins[i].init(100 + i * 8, MAP_HEIGHT - 25 + (int)(4 * sin(i * 0.5)));
+                    }
+
+                    enemies[0].init(60, MAP_HEIGHT - 4);
+                    enemies[1].init(110, MAP_HEIGHT - 16);
+                    enemies[2].init(170, MAP_HEIGHT - 22);
+                    enemies[3].init(205, MAP_HEIGHT - 12);
+
+                    winZone.init(235, MAP_HEIGHT - 12);
+                    break;
+                }
             }
         }
 
@@ -254,7 +288,7 @@ class Game {
                     b.symbol = BLOCK_CHAR;
                     spawnCoinFromBox(b.x, b.y - 1);
                     player.vy = 0;
-                    player.y = b.y + b.h;
+                    player.y = b.y + b.h + 0.01f;
                 }
 
                 if (player.vy > 0 && player.intersects(b)) {
@@ -276,13 +310,33 @@ class Game {
         }
 
         void updateCoins() {
-            for (int i = 0; i < NUM_COINS * 2; ++i){
+            for (int i = 0; i < NUM_COINS * 2; i++) {
+                if (!coins[i].active) continue;
+
                 Coin &c = coins[i];
-                if (!c.active) continue;
-                c.vy += GRAVITY;
+
+                c.vy += 0.3f;
                 c.y += c.vy;
-                if (c.y+ c.h >= MAP_HEIGHT) {
-                    c.active=false;
+
+                for (int j = 0; j < NUM_BLOCKS; j++) {
+                    if (!blocks[j].active) continue;
+
+                    Block &b = blocks[j];
+
+                    bool collisionX = c.x + c.w > b.x && c.x < b.x + b.w;
+                    bool collisionY = c.y + c.h > b.y && c.y < b.y + b.h;
+
+                    if (collisionX && collisionY) {
+                        if (c.vy > 0 && c.y + c.h - c.vy <= b.y) {
+                            c.y = b.y - c.h;
+                            c.vy = 0;
+                        }
+                    }
+                }
+
+                if (c.y + c.h >= MAP_HEIGHT) {
+                    c.y = MAP_HEIGHT - c.h;
+                    c.vy = 0;
                 }
             }
         }
@@ -291,6 +345,7 @@ class Game {
             for (int i = 0; i < NUM_ENEMIES; i++) {
                 Enemy &e = enemies[i];
                 if (!e.active) continue;
+
                 e.vy += GRAVITY;
                 e.y += e.vy;
 
@@ -304,12 +359,33 @@ class Game {
                 }
 
                 e.x += e.vx;
+
                 for (int b = 0; b < NUM_BLOCKS; b++) {
                     if (blocks[b].active && e.intersects(blocks[b])) {
                         e.x -= e.vx;
                         e.vx = -e.vx;
                         break;
                     }
+                }
+
+                float footX = (e.vx > 0) ? e.x + e.w : e.x - 0.1f;
+                float footY = e.y + e.h + 0.1f;
+
+                bool groundAhead = false;
+                for (int b = 0; b < NUM_BLOCKS; b++) {
+                    if (!blocks[b].active) continue;
+
+                    Block &blk = blocks[b];
+                    bool withinX = (footX >= blk.x) && (footX <= blk.x + blk.w);
+                    bool justBelow = (footY >= blk.y) && (footY <= blk.y + blk.h);
+                    if (withinX && justBelow) {
+                        groundAhead = true;
+                        break;
+                    }
+                }
+
+                if (!groundAhead) {
+                    e.vx = -e.vx;
                 }
             }
         }
@@ -390,7 +466,7 @@ class Game {
             drawObject(player);
 
             char buf[20];
-            sprintf(buf,"Score: %d",score);
+            sprintf(buf, "Score: %d", score);
             for (int i = 0; i < strlen(buf); ++i) {
                 map[0][i] = buf[i];
             }
@@ -421,9 +497,10 @@ class Game {
                 updateEnemies();
                 updateCoins();
                 checkCollisions();
-                scrollWorld(dx);
+                player.x += dx;
+                scrollWorld(-dx);
                 render();
-                Sleep(30);
+                Sleep(15);
             }
         }
 };
