@@ -23,7 +23,7 @@ const float COIN_UP_SPEED = -0.7f;
 const int NUM_BLOCKS = 60;
 const int NUM_ENEMIES = 5;
 const int NUM_COINS = 10;
-const int NUM_BOXES   = 5;
+const int NUM_BOXES = 5;
 
 class GameObject {
     public:
@@ -98,21 +98,6 @@ public:
     }
 };
 
-class Box : public GameObject {
-    public:
-        bool used;
-        Box() : GameObject(0, 0, 2, 2, BOX_CHAR), used(false) {}
-        void init(float x_, float y_) {
-            x = x_;
-            y = y_;
-            w = 2;
-            h = 2;
-            symbol = BOX_CHAR;
-            used = false;
-            active = true;
-        }
-};
-
 class WinZone : public GameObject {
     public:
         WinZone() : GameObject(0, 0, 2, 2, WIN_CHAR) {}
@@ -143,7 +128,6 @@ class Game {
         char map[MAP_HEIGHT][MAP_WIDTH + 1];
         Player player;
         Block blocks[NUM_BLOCKS];
-        Box boxes[NUM_BOXES];
         Enemy enemies[NUM_ENEMIES];
         Coin coins[NUM_COINS * 2];
         WinZone winZone;
@@ -153,19 +137,20 @@ class Game {
 
         Game() {
             hideCursor();
-            loadLevel(3);
+            loadLevel(1);
         }
 
         void loadLevel(int lvl) {
             currentLevel = lvl;
             score = 0;
 
+            // Деактивируем все объекты
             for (int i = 0; i < NUM_BLOCKS; i++) blocks[i].active = false;
-            for (int i = 0; i < NUM_BOXES; i++) boxes[i].active = false;
             for (int i = 0; i < NUM_ENEMIES; i++) enemies[i].active = false;
             for (int i = 0; i < NUM_COINS * 2; i++) coins[i].active = false;
             winZone.active = false;
 
+            // Позиция игрока
             player.x = 5;
             player.y = MAP_HEIGHT - 6;
             player.vx = 0;
@@ -176,159 +161,152 @@ class Game {
                 case 1: {
                     levelLength = 220.0f;
 
-                    for (int i = 0; i < 45; i++) {
-                        if (i >= 20 && i <= 23) continue;
-                        blocks[i].init(i * 5, MAP_HEIGHT - 2, 5, 2);
-                    }
+                    // Платформы
+                    blocks[0].init(0, MAP_HEIGHT - 2, 20, 2);
+                    blocks[1].init(30, MAP_HEIGHT - 2, 20, 2);
+                    blocks[2].init(60, MAP_HEIGHT - 4, 20, 2);
+                    blocks[3].init(90, MAP_HEIGHT - 2, 20, 2);
+                    blocks[4].init(130, MAP_HEIGHT - 6, 20, 2);
+                    blocks[5].init(170, MAP_HEIGHT - 2, 20, 2);
 
-                    blocks[45].init(130, MAP_HEIGHT - 8, 6, 2);
-                    blocks[46].init(145, MAP_HEIGHT - 12, 6, 2);
+                    // Монеты
+                    coins[0].init(35, MAP_HEIGHT - 5);
+                    coins[1].init(65, MAP_HEIGHT - 7);
+                    coins[2].init(95, MAP_HEIGHT - 5);
+                    coins[3].init(135, MAP_HEIGHT - 9);
+                    coins[4].init(175, MAP_HEIGHT - 5);
 
-                    boxes[0].init(30, MAP_HEIGHT - 6);
-                    boxes[1].init(80, MAP_HEIGHT - 6);
-                    boxes[2].init(140, MAP_HEIGHT - 14);
+                    // Враги — только на платформах
+                    enemies[0].init(5, blocks[0].y - enemies[0].h);
+                    enemies[1].init(65, blocks[2].y - enemies[1].h);
+                    enemies[2].init(140, blocks[4].y - enemies[2].h);
 
-                    enemies[0].init(60, MAP_HEIGHT - 4);
-                    enemies[1].init(100, MAP_HEIGHT - 4);
-                    enemies[2].init(150, MAP_HEIGHT - 14);
-
-                    for (int i = 0; i < 5; i++) {
-                        coins[i].init(10 + i * 10, MAP_HEIGHT - 5);
-                    }
-                    for (int i = 5; i < 8; i++) {
-                        coins[i].init(130 + (i - 5) * 5, MAP_HEIGHT - 15);
-                    }
-
-                    winZone.init(215, MAP_HEIGHT - 4);
+                    // Финиш
+                    winZone.init(195, MAP_HEIGHT - 4);
                     break;
                 }
 
                 case 2: {
                     levelLength = 240.0f;
 
-                    for (int i = 0; i < 20; i++) {
-                        blocks[i].init(i * 6, MAP_HEIGHT - 2, 6, 2);
-                    }
-                    for (int i = 0; i < 8; i++) {
-                        blocks[20 + i].init(120 + i * 8, MAP_HEIGHT - 8 - (i % 2) * 4, 8, 2);
-                    }
+                    // Платформы
+                    blocks[0].init(0, MAP_HEIGHT - 2, 25, 2);
+                    blocks[1].init(35, MAP_HEIGHT - 4, 20, 2);
+                    blocks[2].init(65, MAP_HEIGHT - 6, 15, 2);
+                    blocks[3].init(90, MAP_HEIGHT - 2, 25, 2);
+                    blocks[4].init(130, MAP_HEIGHT - 4, 20, 2);
+                    blocks[5].init(170, MAP_HEIGHT - 2, 25, 2);
 
-                    boxes[0].init(60, MAP_HEIGHT - 6);
-                    boxes[1].init(140, MAP_HEIGHT - 12);
-                    boxes[2].init(176, MAP_HEIGHT - 16);
-                    boxes[3].init(200, MAP_HEIGHT - 12);
+                    // Монеты
+                    coins[0].init(40, MAP_HEIGHT - 6);
+                    coins[1].init(70, MAP_HEIGHT - 8);
+                    coins[2].init(95, MAP_HEIGHT - 4);
+                    coins[3].init(135, MAP_HEIGHT - 6);
+                    coins[4].init(175, MAP_HEIGHT - 4);
 
-                    for (int i = 0; i < 10; i++) {
-                        coins[i].init(120 + i * 10, MAP_HEIGHT - 15 - (i % 2) * 4);
-                    }
+                    // Враги на платформах
+                    enemies[0].init(35, blocks[1].y - enemies[0].h);
+                    enemies[1].init(130, blocks[4].y - enemies[1].h);
+                    enemies[2].init(175, blocks[5].y - enemies[2].h);
 
-                    enemies[0].init(80, MAP_HEIGHT - 4);
-                    enemies[1].init(150, MAP_HEIGHT - 10);
-                    enemies[2].init(190, MAP_HEIGHT - 14);
-
-                    winZone.init(230, MAP_HEIGHT - 18);
+                    // Финиш
+                    winZone.init(200, MAP_HEIGHT - 4);
                     break;
                 }
 
                 case 3: {
                     levelLength = 240.0f;
-                    for (int i = 0; i < 50; i++) {
-                        if (i % 10 == 5) continue;
-                        float heightOffset = (i % 15 < 7) ? 0 : 4;
-                        blocks[i].init(i * 5, MAP_HEIGHT - 2 - heightOffset, 5, 2);
-                    }
 
-                    blocks[51].init(90, MAP_HEIGHT - 14, 10, 2);
-                    blocks[52].init(160, MAP_HEIGHT - 20, 10, 2);
-                    blocks[53].init(200, MAP_HEIGHT - 10, 10, 2);
+                    // Платформы
+                    blocks[0].init(0, MAP_HEIGHT - 2, 25, 2);
+                    blocks[1].init(30, MAP_HEIGHT - 4, 20, 2);
+                    blocks[2].init(60, MAP_HEIGHT - 6, 15, 2);
+                    blocks[3].init(85, MAP_HEIGHT - 2, 25, 2);
+                    blocks[4].init(120, MAP_HEIGHT - 4, 20, 2);
+                    blocks[5].init(155, MAP_HEIGHT - 6, 20, 2);
+                    blocks[6].init(190, MAP_HEIGHT - 2, 25, 2);
 
-                    boxes[0].init(100, MAP_HEIGHT - 16);
-                    boxes[1].init(160, MAP_HEIGHT - 22);
-                    boxes[2].init(210, MAP_HEIGHT - 12);
+                    // Монеты
+                    coins[0].init(35, MAP_HEIGHT - 5);
+                    coins[1].init(65, MAP_HEIGHT - 7);
+                    coins[2].init(90, MAP_HEIGHT - 3);
+                    coins[3].init(125, MAP_HEIGHT - 5);
+                    coins[4].init(160, MAP_HEIGHT - 7);
+                    coins[5].init(195, MAP_HEIGHT - 3);
 
-                    for (int i = 0; i < 12; i++) {
-                        coins[i].init(100 + i * 8, MAP_HEIGHT - 25 + (int)(4 * sin(i * 0.5)));
-                    }
+                    // Враги на платформах
+                    enemies[0].init(35, blocks[1].y - enemies[0].h);
+                    enemies[1].init(125, blocks[4].y - enemies[1].h);
+                    enemies[2].init(195, blocks[6].y - enemies[2].h);
 
-                    enemies[0].init(60, MAP_HEIGHT - 4);
-                    enemies[1].init(110, MAP_HEIGHT - 16);
-                    enemies[2].init(170, MAP_HEIGHT - 22);
-                    enemies[3].init(205, MAP_HEIGHT - 12);
-
-                    winZone.init(235, MAP_HEIGHT - 12);
+                    // Финиш
+                    winZone.init(220, MAP_HEIGHT - 4);
                     break;
                 }
             }
         }
 
+
+
         void updatePlayerPhysics() {
+            player.x += player.vx;
+
+            for (int i = 0; i < NUM_BLOCKS; ++i) {
+                Block &b = blocks[i];
+                if (!b.active) continue;
+                if (player.intersects(b)) {
+                    if (player.vx > 0) {
+                        player.x = b.x - player.w;
+                    } else if (player.vx < 0) {
+                        player.x = b.x + b.w;
+                    }
+                    player.vx = 0;
+                }
+            }
+
             player.vy += GRAVITY;
             player.y += player.vy;
             player.onGround = false;
 
             for (int i = 0; i < NUM_BLOCKS; ++i) {
-                if (player.intersects(blocks[i])) {
+                Block &b = blocks[i];
+                if (!b.active) continue;
+
+                if (player.intersects(b)) {
                     if (player.vy > 0) {
-                        player.y = blocks[i].y - player.h;
+                        player.y = b.y - player.h;
                         player.vy = 0;
                         player.onGround = true;
                     } else if (player.vy < 0) {
-                        player.y = blocks[i].y + blocks[i].h;
+                        player.y = b.y + b.h;
                         player.vy = 0;
                     }
                 }
             }
-
-            for (int i = 0; i < NUM_BOXES; ++i) {
-                Box &b = boxes[i];
-                if (!b.active) continue;
-
-                if (player.vy < 0 && player.intersects(b) && !b.used) {
-                    b.used = true;
-                    b.symbol = BLOCK_CHAR;
-                    spawnCoinFromBox(b.x, b.y - 1);
-                    player.vy = 0;
-                    player.y = b.y + b.h + 0.01f;
-                }
-
-                if (player.vy > 0 && player.intersects(b)) {
-                    player.y = b.y - player.h;
-                    player.vy = 0;
-                    player.onGround = true;
-                }
-            }
         }
 
-        void spawnCoinFromBox(float x, float y){
-            for(int i = NUM_COINS; i < NUM_COINS*2; ++i){
-                if(!coins[i].active) {
-                    coins[i].init(x,y);
-                    coins[i].vy = COIN_UP_SPEED;
-                    break;
-                }
+        void checkPlayerFall() {
+            if (player.y > MAP_HEIGHT) {
+                loadLevel(currentLevel);
             }
         }
 
         void updateCoins() {
             for (int i = 0; i < NUM_COINS * 2; i++) {
-                if (!coins[i].active) continue;
-
                 Coin &c = coins[i];
+                if (!c.active) continue;
 
-                c.vy += 0.3f;
+                c.vy += GRAVITY;
                 c.y += c.vy;
 
                 for (int j = 0; j < NUM_BLOCKS; j++) {
                     if (!blocks[j].active) continue;
-
-                    Block &b = blocks[j];
-
-                    bool collisionX = c.x + c.w > b.x && c.x < b.x + b.w;
-                    bool collisionY = c.y + c.h > b.y && c.y < b.y + b.h;
-
-                    if (collisionX && collisionY) {
-                        if (c.vy > 0 && c.y + c.h - c.vy <= b.y) {
-                            c.y = b.y - c.h;
+                    if (c.intersects(blocks[j])) {
+                        if (c.vy > 0) {
+                            c.y = blocks[j].y - c.h;
+                            c.vy = 0;
+                        } else if (c.vy < 0) {
+                            c.y = blocks[j].y + blocks[j].h;
                             c.vy = 0;
                         }
                     }
@@ -427,9 +405,6 @@ class Game {
             for (int i = 0; i < NUM_BLOCKS; i++) {
                 if (blocks[i].active) blocks[i].x += worldShift;
             }
-            for (int i = 0; i < NUM_BOXES; i++) {
-                if (boxes[i].active) boxes[i].x += worldShift;
-            }
             for (int i = 0; i < NUM_ENEMIES; i++) {
                 if (enemies[i].active) enemies[i].x += worldShift;
             }
@@ -447,10 +422,6 @@ class Game {
             }
             for (int i = 0; i < NUM_BLOCKS; ++i) {
                 drawObject(blocks[i]);
-            }
-
-            for (int i = 0; i < NUM_BOXES; ++i) {
-                if (boxes[i].active) drawObject(boxes[i]);
             }
 
             for (int i = 0; i < NUM_ENEMIES; ++i) {
@@ -497,6 +468,7 @@ class Game {
                 updateEnemies();
                 updateCoins();
                 checkCollisions();
+                checkPlayerFall();
                 player.x += dx;
                 scrollWorld(-dx);
                 render();
