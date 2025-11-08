@@ -402,40 +402,41 @@ class Game {
         }
 
         void render() {
+            // Сначала полностью очищаем карту
             for (int j = 0; j < MAP_HEIGHT; ++j) {
                 for (int i = 0; i < MAP_WIDTH; ++i)
                     map[j][i] = EMPTY_CHAR;
                 map[j][MAP_WIDTH] = '\0';
             }
-            for (int i = 0; i < NUM_BLOCKS; ++i) {
-                drawObject(blocks[i]);
-            }
 
-            for (int i = 0; i < NUM_ENEMIES; ++i) {
+            // Рисуем только активные объекты
+            for (int i = 0; i < NUM_BLOCKS; ++i)
+                if (blocks[i].active) drawObject(blocks[i]);
+
+            for (int i = 0; i < NUM_ENEMIES; ++i)
                 if (enemies[i].active) drawObject(enemies[i]);
-            }
 
-            for (int i = 0; i < NUM_COINS; ++i) {
+            for (int i = 0; i < NUM_COINS; ++i)
                 if (coins[i].active) drawObject(coins[i]);
-            }
 
             if (winZone.active) drawObject(winZone);
 
             drawObject(player);
 
-            char buf[20];
-            sprintf(buf, "Score: %d", score);
-            for (int i = 0; i < strlen(buf); ++i) {
+            // Выводим Score и Level
+            char buf[40];
+            sprintf(buf, "Score: %d  Level: %d", score, currentLevel);
+            for (int i = 0; i < strlen(buf); ++i)
                 map[0][i] = buf[i];
-            }
 
+            // Вывод карты в консоль
             setCursor(0, 0);
             HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
             DWORD written;
-            for (int j = 0; j < MAP_HEIGHT; ++j) {
+            for (int j = 0; j < MAP_HEIGHT; ++j)
                 WriteConsoleOutputCharacterA(h, map[j], MAP_WIDTH, {0, (SHORT)j}, &written);
-            }
         }
+
 
         void drawObject(const GameObject& obj) {
             for (int j = (int)obj.y; j < (int)(obj.y + obj.h); ++j) {
